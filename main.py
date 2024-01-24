@@ -1,45 +1,65 @@
 from fastapi import FastAPI
 
-from models import Task
-from config import test_task
+from typing import List
+
+from models import Task, New_Task
+from data_db import database, task_table
 
 app = FastAPI()
 
 
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
+
+
 @app.get("/")
-@app.get("/task")
 async def root():
-    return {"Tasks": test_task}
+    return {"List_Tasks": '/tasks'}
+
+@app.get("/tasks", response_model=List[Task])
+async def read_tasks():
+    query = task_table.select()
+    return await database.fetch_all(query)
 
 
-@app.get("/task/{id}")
-async def get_task(id: int):
-    for task in test_task:
-        if task['id'] == id:
-            return {f"Task {id}": task}
-    return {"Task": 'NotFound'}
+@app.get("/task/{task_id}", response_model=Task)
+async def get_task(task_id: int):
+    item_task = task_table.select().where(task_table.c.id == task_id)
+    return await database.fetch_one(item_task)
 
 
-@app.post("/tasks/")
-async def create_task(task: Task):
-    print(f"{task=}")
-    test_task.append(dict(task))
-    return {f"Task": task}
+@app.post("/tasks/", response_model=Task)
+async def create_task(new_task: New_Task):
+    query = task_table.insert().values(
+        title=new_task.title,
+        body=new_task.body,
+        status=new_task.status,
+        is_active=new_task.is_active
+    )
+    last_record_id = await database.execute(query)
+    return await database.fetch_all(query)
 
 
-@app.put("/tasks/{task_id}")
-async def update_task(task_id: int, task: Task):
-    for t in test_task:
-        if t['id'] == task_id:
-            t.update(task)
-            return {'task_id': task_id, 'task': t}
-    return {"Task": 'NotFound'}
+@app.put("/tasks/{task_id}", response_model=Task)
+async def update_task(task_id: int, new_task: New_Task):
+    item_task = task_table.update().where(task_table.c.id == task_id).values(
+        title=new_task.title,
+        body=new_task.body,
+        status=new_task.status,
+        is_active=new_task.is_active
+    )
+    await database.execute(item_task)
+    return {**new_task.dict(), "id": task_id}
 
 
 @app.delete("/tasks/{task_id}")
-async def delete_task(task_id: int, task: Task):
-    for t in test_task:
-        if t['id'] == task_id:
-            t.update(is_active=False)
-            return {f'DELETE Task: {t}'}
-    return {"Task": 'NotFound'}
+async def delete_task(task_id: int):
+    item_task = task_table.delete().where(task_table.c.id == task_id)
+    await database.execute(item_task)
+    return {'message': 'Task deleted'}

@@ -5,7 +5,62 @@ Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/hello/User
+GET http://127.0.0.1:8000/tasks
 Accept: application/json
 
 ###
+
+# curl -X 'POST'
+#  'http://127.0.0.1:8000/tasks/'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "title": "Третья заметка",
+#  "body": "Исправил ошибку при сохранении bool значений в базу",
+#  "status": false,
+#  "is_active": true
+#}'
+POST http://127.0.0.1:8000/tasks/
+accept: application/json
+Content-Type: application/json
+
+{
+  "title": "Девятая заметка",
+  "body": "создал заметку для проверке метода POST при отправке в репозиторий",
+  "status": false,
+  "is_active": true
+}
+
+###
+
+# curl -X 'PUT'
+#  'http://127.0.0.1:8000/tasks/13'
+#  -H 'accept: application/json'
+#  -H 'Content-Type: application/json'
+#  -d '{
+#  "title": "Восьмая Заметка",
+#  "body": "Изменил поле заметки",
+#  "status": false,
+#  "is_active": true
+#}'
+PUT http://127.0.0.1:8000/tasks/15
+Content-Type: application/json
+
+{
+  "title": "Новая Заметка",
+  "body": "проверка метода PUT",
+  "status": false,
+  "is_active": true
+}
+
+###
+
+# curl -X 'DELETE'
+#  'http://127.0.0.1:8000/tasks/7'
+#  -H 'accept: application/json'
+DELETE http://127.0.0.1:8000/tasks/15
+accept: application/json
+
+###
+
+

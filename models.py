@@ -2,12 +2,18 @@
 # Для каждой задачи должна быть возможность указать статус (выполнена/не выполнена).
 
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Task(BaseModel):
     id: int
     title: str
-    body: Optional[str] = None
-    status: Optional[bool] = False
-    is_active: Optional[bool] = True
+    body: str = None
+    status: bool = False
+    is_active: bool = True
+
+class New_Task(BaseModel):
+    title: str
+    body: str = None
+    status: bool = False
+    is_active: bool = True
